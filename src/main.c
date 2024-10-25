@@ -6,7 +6,7 @@
 /*   By: hakobaya <hakobaya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 16:49:18 by hakobaya          #+#    #+#             */
-/*   Updated: 2024/10/26 01:17:00 by hakobaya         ###   ########.fr       */
+/*   Updated: 2024/10/26 01:57:07 by hakobaya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,8 @@ int main(int ac, char **av)
         free(config);
         return (1);
     }
+    config->forks = forks;
+    config->print_mutex = print_mutex;
     if (!philo_init(&philosophers, config))
     {
         ft_put_fd(ERROR_FD, "ERROR: Philosopher initialization failed\n");

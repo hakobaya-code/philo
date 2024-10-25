@@ -6,14 +6,14 @@
 #    By: hakobaya <hakobaya@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/25 16:49:38 by hakobaya          #+#    #+#              #
-#    Updated: 2024/10/26 00:58:48 by hakobaya         ###   ########.fr        #
+#    Updated: 2024/10/26 01:20:08 by hakobaya         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -pthread
 INCLUDE = -I ./include
 
 SRC_DIR = ./src/
@@ -43,3 +43,4 @@ fclean : clean
 
 re : fclean all
 
+.PHONY: all clean fclrean re
