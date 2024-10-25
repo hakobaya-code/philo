@@ -6,7 +6,7 @@
 /*   By: hakobaya <hakobaya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 16:57:45 by hakobaya          #+#    #+#             */
-/*   Updated: 2024/10/25 17:04:03 by hakobaya         ###   ########.fr       */
+/*   Updated: 2024/10/25 17:10:25 by hakobaya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 
 # include <stdio.h>
 
-# define ERROR_EXIT 1
+# define ERROR_FD 2
 
 typedef enum e_status
 {
