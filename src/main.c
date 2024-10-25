@@ -6,60 +6,11 @@
 /*   By: hakobaya <hakobaya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 16:49:18 by hakobaya          #+#    #+#             */
-/*   Updated: 2024/10/25 17:26:47 by hakobaya         ###   ########.fr       */
+/*   Updated: 2024/10/25 18:24:31 by hakobaya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-int ft_strlen(char *str)
-{
-    int i;
-
-    i = 0;
-    while (str[i] != '\0')
-        i++;
-    return (i);
-}
-
-void    ft_put_fd(int fd, char *msg)
-{
-    write(fd, msg, ft_strlen(msg));
-}
-
-
-int    args_error()
-{
-    ft_put_fd(ERROR_FD, "ERROR: Invalid arguments\n");
-    ft_put_fd(ERROR_FD, "USAGE: ");
-    ft_put_fd(ERROR_FD, "./philo num die eat sleep\n");
-    ft_put_fd(ERROR_FD, "num : number of philosophers\n");
-    ft_put_fd(ERROR_FD, "die : time to die [ms]\n");
-    ft_put_fd(ERROR_FD, "eat : time to eat [ms]\n");
-    ft_put_fd(ERROR_FD, "sleep : time to sleep [ms]\n");
-    ft_put_fd(ERROR_FD, "option : [number_of_times_each_philosopher_must_eat] [ms]\n");
-    ft_put_fd(ERROR_FD, "example [./philo 4 500 200 200]\n");
-    return (1);
-}
-
-int ft_atoi(char *str)
-{
-    int i;
-    long num;
-
-    i = 0;
-    num = 0;
-    while (str[i])
-    {
-        if (str[i] < '0' || str[i] > '9')
-            return (-1);
-        num = num * 10 + (str[i] - '0');
-        if (num > INT_MAX)
-            return (-1);
-        i++;
-    }
-    return ((int)num);
-}
 
 bool is_number(char *str)
 {
@@ -77,59 +28,86 @@ bool is_number(char *str)
     return (true);
 }
 
-bool    validate_args(int ac, char **av)
+bool create_threads(t_philo *philosophers, int num_philosophers)
 {
     int i;
 
-    i = 1;
-    while (i < ac)
+    i = 0;
+    while (i < num_philosophers)
     {
-        if (!is_number(av[i]))
-            return (false);
-        i++;
-    }
-    return (true);
-}
-
-// 引数を解析し、構造体に格納する関数
-bool config_init(int ac, char **av, t_config *config)
-{
-    if (!is_number(av[1]) || !is_number(av[2]) || !is_number(av[3]) || !is_number(av[4]))
-        return false;
-    config->number_of_philosophers = ft_atoi(av[1]);
-    config->time_to_die = ft_atoi(av[2]);
-    config->time_to_eat = ft_atoi(av[3]);
-    config->time_to_sleep = ft_atoi(av[4]);
-    if (ac == 6)
-    {
-        if (!is_number(av[5]))
-            return (false);
-        config->number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
-    }
-    else
-        config->number_of_times_each_philosopher_must_eat = -1;
-    if (config->number_of_philosophers <= 0 || config->time_to_die <= 0 ||
-        config->time_to_eat <= 0 || config->time_to_sleep <= 0 ||
-        (ac == 6 && config->number_of_times_each_philosopher_must_eat <= 0))
+        if (pthread_create(&philosophers[i].thread, NULL, philo_routine, &philosophers[i]) != 0)
         return (false);
+    }
     return (true);
 }
 
 int main(int ac, char **av)
 {
     t_config *config;
+    pthread_mutex_t *forks;
+    pthread_mutex_t print_mutex;
+    t_philo *philosophers;
+    int i;
+
+    if (ac != 5 && ac != 6)
+        return (args_error());
 
     config = (t_config *)malloc(sizeof(t_config));
     if (!config)
-        return (1);
-    if (ac == 5 || ac == 6)
     {
-        if (!validate_args(ac, av))
-            return (1);
-        if (!(config_init(ac, av, config)))
-            return (1);
-        ft_put_fd(1, "OK\n");
+        ft_put_fd(ERROR_FD, "ERROR: malloc error\n");
+        return (1);
     }
-    else
-        return (args_error());
+    if (!(config_init(ac, av, config)))
+    {
+        ft_put_fd(ERROR_FD, "Initialization failed\n");
+        free(config);
+        return (1);
+    }
+    if (!mutex_init(config, &forks, &print_mutex))
+    {
+        ft_put_fd(ERROR_FD, "ERROR: Mutex initialization failed\n");
+        free(config);
+        return (1);
+    }
+    if (!philo_init(&philosophers, config))
+    {
+        ft_put_fd(ERROR_FD, "ERROR: Philosopher initialization failed\n");
+        // ミューテックスの破棄
+        i = 0;
+        while (i < config->number_of_philosophers)
+        {
+            pthread_mutex_destroy(&forks[i]);
+            i++;
+        }
+        pthread_mutex_destroy(&print_mutex);
+        free(forks);
+        free(config);
+        return (1);
+    }
+    if (!create_threads(philosophers, config->number_of_philosophers))
+    {
+        ft_put_fd(ERROR_FD, "ERROR: Thread creation failed\n");
+        // ミューテックスの破棄とメモリの解放
+        i = 0;
+        while (i < config->number_of_philosophers)
+        {
+            pthread_mutex_destroy(&forks[i]);
+            i++;
+        }
+        pthread_mutex_destroy(&print_mutex);
+        free(forks);
+        free(philosophers);
+        free(config);
+        return (1);
+    }
+    ft_put_fd(1, "OK\n");
+    i = 0;
+    while (i < config->number_of_philosophers)
+    {
+        pthread_join(philosophers[i].thread, NULL);
+        i++;
+    }
+    free_all(config, forks, philosophers, &print_mutex);
+    return (0);
 }
