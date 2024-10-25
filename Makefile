@@ -6,7 +6,7 @@
 #    By: hakobaya <hakobaya@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/25 16:49:38 by hakobaya          #+#    #+#              #
-#    Updated: 2024/10/25 17:02:59 by hakobaya         ###   ########.fr        #
+#    Updated: 2024/10/26 00:58:48 by hakobaya         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ INCLUDE = -I ./include
 SRC_DIR = ./src/
 OBJ_DIR = ./obj/
 
-SRC = main.c
+SRC = main.c philo.c init.c util.c
 
 SRCS = $(addprefix $(SRC_DIR), $(SRC))
 OBJS = $(addprefix $(OBJ_DIR), $(SRC:%.c=%.o))

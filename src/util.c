@@ -6,7 +6,7 @@
 /*   By: hakobaya <hakobaya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 18:23:37 by hakobaya          #+#    #+#             */
-/*   Updated: 2024/10/25 18:24:18 by hakobaya         ###   ########.fr       */
+/*   Updated: 2024/10/26 01:16:30 by hakobaya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,4 +75,11 @@ void    free_all(t_config *config, pthread_mutex_t *forks, t_philo *philosophers
     free(forks);
     free(philosophers);
     free(config);
+}
+
+long    current_time(void)
+{
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    return ((time.tv_sec * 1000) + (time.tv_usec / 1000));    
 }

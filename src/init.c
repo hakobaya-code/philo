@@ -6,7 +6,7 @@
 /*   By: hakobaya <hakobaya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 18:21:57 by hakobaya          #+#    #+#             */
-/*   Updated: 2024/10/25 18:22:36 by hakobaya         ###   ########.fr       */
+/*   Updated: 2024/10/26 01:18:26 by hakobaya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,14 @@ bool mutex_init(t_config *config, pthread_mutex_t **forks, pthread_mutex_t *prin
     int i;
 
     *forks = malloc(sizeof(pthread_mutex_t) * config->number_of_philosophers);
-    if (!forks)
+    if (!*forks)
         return (false);
     i = 0;
     while (i < config->number_of_philosophers)
     {
         if (pthread_mutex_init(&(*forks)[i], NULL) != 0)
             return (false);
+        i++;
     }
     if (pthread_mutex_init(print_mutex, NULL) != 0)
         return (false);
@@ -69,9 +70,10 @@ bool    philo_init(t_philo **philosophers, t_config *config)
         (*philosophers)[i].left_fork = i;
         (*philosophers)[i].right_fork = (i + 1) % config->number_of_philosophers;
         (*philosophers)[i].eat_count = 0;
-        (*philosophers)[i].last_eat_time = 0;
+        (*philosophers)[i].last_eat_time = current_time();
         (*philosophers)[i].config = config;
         i++;
     }
+    config->philosophers = *philosophers;
     return (true);
 }

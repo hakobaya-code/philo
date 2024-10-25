@@ -6,18 +6,39 @@
 /*   By: hakobaya <hakobaya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 18:23:00 by hakobaya          #+#    #+#             */
-/*   Updated: 2024/10/26 00:34:16 by hakobaya         ###   ########.fr       */
+/*   Updated: 2024/10/26 01:16:25 by hakobaya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-long    current_time()
+void    *monitoring_routine(void *arg)
 {
-    struct timeval time;
-    gettimeofday(&time, NULL);
-    return ((time.tv_sec * 1000) + (time.tv_usec / 1000));    
+    t_config *config;
+    int i;
+
+    config = (t_config *)arg;
+    while (1)
+    {
+        i = 0;
+        while (i < config->number_of_philosophers)
+        {
+            pthread_mutex_lock(&config->print_mutex);
+            if ((current_time() - config->philosophers[i].last_eat_time) > config->time_to_die)
+            {
+                printf("Philosopher %d died\n", config->philosophers[i].id);
+                pthread_mutex_unlock(&config->print_mutex);
+                exit(0);
+            }
+            pthread_mutex_unlock(&config->print_mutex);
+            i++;
+        }
+        usleep(1000);
+    }
+    return (NULL);
 }
+
+
 
 void    *philo_routine(void *arg)
 {

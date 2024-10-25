@@ -6,7 +6,7 @@
 /*   By: hakobaya <hakobaya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 16:57:45 by hakobaya          #+#    #+#             */
-/*   Updated: 2024/10/25 18:02:42 by hakobaya         ###   ########.fr       */
+/*   Updated: 2024/10/26 01:08:36 by hakobaya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,9 @@ typedef struct s_config
 	long			time_to_eat;      // 食事にかかる時間
 	long			time_to_sleep;    // 睡眠にかかる時間
 	int				number_of_times_each_philosopher_must_eat;        // 必須の食事回数
-    pthread_mutex_t    *forks;
-    pthread_mutex_t    print_mutex;
+    pthread_mutex_t    *forks; // フォーク用ミューテックス
+    pthread_mutex_t    print_mutex; // 出力用ミューテックス
+	struct s_philo	*philosophers; // 哲学者構造体配列へのポインタ
 
 }	t_config;
 
@@ -69,5 +70,7 @@ bool    philo_init(t_philo **philosophers, t_config *config);
 bool    create_threads(t_philo *philosophers, int num_philosophers);
 void    *philo_routine(void *arg);
 void    free_all(t_config *config, pthread_mutex_t *forks, t_philo *philosophers, pthread_mutex_t *print_mutex);
+void    *monitoring_routine(void *arg);
+long    current_time(void);
 
 #endif

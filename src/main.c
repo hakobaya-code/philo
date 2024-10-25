@@ -6,7 +6,7 @@
 /*   By: hakobaya <hakobaya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 16:49:18 by hakobaya          #+#    #+#             */
-/*   Updated: 2024/10/25 18:24:31 by hakobaya         ###   ########.fr       */
+/*   Updated: 2024/10/26 01:17:00 by hakobaya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,8 @@ bool create_threads(t_philo *philosophers, int num_philosophers)
     while (i < num_philosophers)
     {
         if (pthread_create(&philosophers[i].thread, NULL, philo_routine, &philosophers[i]) != 0)
-        return (false);
+            return (false);
+        i++;
     }
     return (true);
 }
@@ -47,6 +48,7 @@ int main(int ac, char **av)
     pthread_mutex_t *forks;
     pthread_mutex_t print_mutex;
     t_philo *philosophers;
+    pthread_t monitor_thread;
     int i;
 
     if (ac != 5 && ac != 6)
@@ -101,6 +103,22 @@ int main(int ac, char **av)
         free(config);
         return (1);
     }
+    if (pthread_create(&monitor_thread, NULL, monitoring_routine, config) != 0)
+    {
+        ft_put_fd(ERROR_FD, "ERRLR: Monitor thread creation failed\n");
+        i = 0;
+        while (i < config->number_of_philosophers)
+        {
+            pthread_mutex_destroy(&config->forks[i]);
+            i++;
+        }
+        pthread_mutex_destroy(&config->print_mutex);
+        free(config->forks);
+        free(config->philosophers);
+        free(config);
+        return (1);
+    }
+
     ft_put_fd(1, "OK\n");
     i = 0;
     while (i < config->number_of_philosophers)
@@ -108,6 +126,9 @@ int main(int ac, char **av)
         pthread_join(philosophers[i].thread, NULL);
         i++;
     }
+
+    pthread_join(monitor_thread, NULL);
+
     free_all(config, forks, philosophers, &print_mutex);
     return (0);
 }
